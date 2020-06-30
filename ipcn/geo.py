@@ -6,7 +6,13 @@ import html.parser
 import os
 import re
 
+import diskcache as dc
+
 from ipcn.format import ip2long, long2ip
+
+_pkg = str(__name__).replace(".", "/")
+_dir = os.path.abspath(os.path.join("/tmp/ip.cn/", _pkg))
+_cache_obj = dc.Cache(_dir)
 
 
 class _parser_cls(html.parser.HTMLParser, abc.ABC):
@@ -72,7 +78,7 @@ def _query_from_ip_cn(ip_str: str):
         parser.feed(ctx)
         parser.close()
         ret_list = parser.get_ret_list()
-        result['ip'] = ret_list[0]
+        # result['ip'] = ret_list[0]
         result['desc_zh'] = ret_list[1]
         cpc = str.split(ret_list[2], ',') if len(ret_list) > 2 else []
         result['city'] = str.strip(cpc[-3] if len(cpc) >= 3 else '')
@@ -94,5 +100,12 @@ def query_ip_location(ip_str):
         long_ip = ip2long(ip_str)
 
     result = dict(ip=raw_ip, ip_long=long_ip)
-    result.update(_query_from_ip_cn(raw_ip))
+    loc_cache = _cache_obj.get(long_ip)
+    if loc_cache:
+        result.update(loc_cache)
+        return result
+
+    loc = _query_from_ip_cn(raw_ip)
+    _cache_obj.set(long_ip, loc)
+    result.update(loc)
     return result

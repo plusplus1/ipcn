@@ -28,8 +28,8 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         "requests>=2.22.0",
+        "diskcache>=2.4.1",
     ],
-
     entry_points="""
     [console_scripts]
     ipcn=ipcn.run:main
