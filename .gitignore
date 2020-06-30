@@ -1,0 +1,9 @@
+.venv
+.idea
+/build/
+/dist/
+/*.egg-info/
+*.pyc
+*.swp
+/test_*.py
+
