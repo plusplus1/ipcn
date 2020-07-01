@@ -5,20 +5,20 @@ import abc
 import html.parser
 import logging
 import os
+import os.path as op
 import re
+import tempfile
 
 import diskcache as dc
 
 from ipcn.format import ip2long, long2ip
 
+logging.basicConfig(level=logging.DEBUG)
+
 _logger = logging.getLogger(__name__)
-_default_expire = None
-try:
-    _cache_obj = dc.Cache()
-except Exception as err:
-    _cache_obj = None
-    _logger.warning("init cache obj failed, %s", err)
-    pass
+_directory = op.join(tempfile.gettempdir(), "ip.cn.disk.cache-u-" + str(os.getuid()))
+_cache_obj = dc.Cache(_directory)
+_logger.debug("init dc: %s", _cache_obj.directory)
 
 
 class _parser_cls(html.parser.HTMLParser, abc.ABC):
@@ -107,19 +107,25 @@ def query_ip_location(ip_str):
 
     result = dict(ip=raw_ip, ip_long=long_ip)
 
-    if _cache_obj:
+    try:
         loc_cache = _cache_obj.get(long_ip)
+        _logger.debug("[GET CACHE] raw_ip=%s\tloc_cache=%s", raw_ip, loc_cache)
         if loc_cache:
             result.update(loc_cache)
             return result
+    except Exception as err:
+        _logger.warning("[GET CACHE] raw_ip=%s\terror=%s", raw_ip, err)
 
     loc = _query_from_ip_cn(raw_ip)
 
     try:
-        if _cache_obj:
-            _cache_obj.set(long_ip, loc, expire=_default_expire)
-    except Exception as ex:
-        _logger.error("Cache ip loc for %s failed, Error: %s", raw_ip, ex)
+        r = _cache_obj.set(long_ip, loc)
+        _logger.debug("[SET CACHE] raw_ip=%s\tset_cache=%s", raw_ip, r)
+    except Exception as err:
+        _logger.warning("[SET CACHE] raw_ip=%s\terror=%s", raw_ip, err)
 
     result.update(loc)
     return result
+
+
+pass

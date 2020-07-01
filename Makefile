@@ -1,4 +1,4 @@
-pub:
+pub: clean
 	python setup.py sdist
 	twine upload dist/*
 
