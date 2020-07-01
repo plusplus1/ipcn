@@ -3,6 +3,7 @@
 
 import abc
 import html.parser
+import logging
 import os
 import re
 
@@ -10,9 +11,14 @@ import diskcache as dc
 
 from ipcn.format import ip2long, long2ip
 
-_cache_obj = dc.Cache()
-# _default_expire = 86400 * 90
+_logger = logging.getLogger(__name__)
 _default_expire = None
+try:
+    _cache_obj = dc.Cache()
+except Exception as err:
+    _cache_obj = None
+    _logger.warning("init cache obj failed, %s", err)
+    pass
 
 
 class _parser_cls(html.parser.HTMLParser, abc.ABC):
@@ -100,12 +106,20 @@ def query_ip_location(ip_str):
         long_ip = ip2long(ip_str)
 
     result = dict(ip=raw_ip, ip_long=long_ip)
-    loc_cache = _cache_obj.get(long_ip)
-    if loc_cache:
-        result.update(loc_cache)
-        return result
+
+    if _cache_obj:
+        loc_cache = _cache_obj.get(long_ip)
+        if loc_cache:
+            result.update(loc_cache)
+            return result
 
     loc = _query_from_ip_cn(raw_ip)
-    _cache_obj.set(long_ip, loc, expire=_default_expire)
+
+    try:
+        if _cache_obj:
+            _cache_obj.set(long_ip, loc, expire=_default_expire)
+    except Exception as ex:
+        _logger.error("Cache ip loc for %s failed, Error: %s", raw_ip, ex)
+
     result.update(loc)
     return result
