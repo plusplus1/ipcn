@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 extras_require = {}
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 setup(
     name="ipcn",

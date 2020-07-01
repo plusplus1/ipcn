@@ -10,9 +10,9 @@ import diskcache as dc
 
 from ipcn.format import ip2long, long2ip
 
-_pkg = str(__name__).replace(".", "/")
-_dir = os.path.abspath(os.path.join("/tmp/ip.cn/", _pkg))
-_cache_obj = dc.Cache(_dir)
+_cache_obj = dc.Cache()
+# _default_expire = 86400 * 90
+_default_expire = None
 
 
 class _parser_cls(html.parser.HTMLParser, abc.ABC):
@@ -106,6 +106,6 @@ def query_ip_location(ip_str):
         return result
 
     loc = _query_from_ip_cn(raw_ip)
-    _cache_obj.set(long_ip, loc)
+    _cache_obj.set(long_ip, loc, expire=_default_expire)
     result.update(loc)
     return result
