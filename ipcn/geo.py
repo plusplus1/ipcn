@@ -13,7 +13,7 @@ import diskcache as dc
 
 from ipcn.format import ip2long, long2ip
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 _logger = logging.getLogger(__name__)
 _directory = op.join(tempfile.gettempdir(), "ip.cn.disk.cache-u-" + str(os.getuid()))
