@@ -1,19 +1,12 @@
-import re
-
 from setuptools import find_packages, setup
 
 extras_require = {}
 
-version = None
-with open('ipcn/__init__.py', 'r') as f:
-    for line in f:
-        m = re.match(r'^__version__\s*=\s*(["\'])([^"\']+)\1', line)
-        if m:
-            version = m.group(2)
-            break
+__version__ = '0.1.2'
+
 setup(
     name="ipcn",
-    version=version,
+    version=__version__,
     description="IP utilities",
     author='plusplus1',
     author_email='pror885@163.com',
@@ -28,11 +21,12 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         "requests>=2.22.0",
-        "diskcache>=2.4.1",
+        "diskcache>=4.1.0",
     ],
-    entry_points="""
-    [console_scripts]
-    ipcn=ipcn.run:main
-    """,
+    entry_points={
+        'console_scripts': [
+            'ipcn=ipcn.run:main'
+        ]
+    },
     extras_require=extras_require,
 )
